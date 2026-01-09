@@ -1,0 +1,77 @@
+<template>
+  <div
+    class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 py-2 gap-4 md:gap-2 gva-container2"
+  >
+    <FFCard custom-class="col-span-1 lg:col-span-2 ">
+      <FFChart :type="1" title="访问人数" />
+    </FFCard>
+    <FFCard custom-class="col-span-1 lg:col-span-2  ">
+      <FFChart :type="2" title="新增客户" />
+    </FFCard>
+    <FFCard custom-class="col-span-1 lg:col-span-2 ">
+      <FFChart :type="3" title="解决数量" />
+    </FFCard>
+    <FFCard
+      title="快捷功能"
+      show-action
+      custom-class="col-start-1 md:col-start-3 lg:col-start-7 row-span-2 "
+    >
+      <FFQuickLink />
+    </FFCard>
+    <FFCard
+      title="内容数据"
+      custom-class="col-span-1 md:col-span-2 md:row-start-2 lg:col-span-6 col-start-1 row-span-2"
+    >
+      <FFChart :type="4" />
+    </FFCard>
+    <FFCard
+      title="文档"
+      show-action
+      custom-class="md:row-start-8 md:col-start-3 lg:row-start-3 lg:col-start-7"
+    >
+      <FFWiki />
+    </FFCard>
+
+    <FFCard
+      title="最新更新"
+      custom-class="col-span-1 md:col-span-3 row-span-2"
+    >
+      <FFTable />
+    </FFCard>
+    <FFCard
+      title="最新插件"
+      custom-class="col-span-1 md:col-span-3 row-span-2"
+    >
+      <FFPluginTable />
+    </FFCard>
+
+    <FFCard title="公告" show-action custom-class="col-span-1 lg:col-start-7">
+      <FFNotice />
+    </FFCard>
+
+    <FFCard
+      without-padding
+      custom-class="overflow-hidden lg:h-40 col-span-1 md:col-start-2 md:col-span-1 lg:col-start-7"
+    >
+      <FFBanner />
+    </FFCard>
+  </div>
+</template>
+
+<script setup>
+  import {
+    FFPluginTable,
+    FFTable,
+    FFChart,
+    FFWiki,
+    FFNotice,
+    FFQuickLink,
+    FFCard,
+    FFBanner
+  } from './components'
+  defineOptions({
+    name: 'Dashboard'
+  })
+</script>
+
+<style lang="scss" scoped></style>
