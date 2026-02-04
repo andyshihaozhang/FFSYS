@@ -7,7 +7,7 @@ import service from '@/utils/request'
  */
 export const createProduct = (data) => {
   return service({
-    url: '/ffproduction/product',
+    url: '/ffProduct/createProduct',
     method: 'post',
     data
   })
@@ -20,7 +20,7 @@ export const createProduct = (data) => {
  */
 export const updateProduct = (data) => {
   return service({
-    url: '/ffproduction/product',
+    url: '/ffProduct/updateProduct',
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export const updateProduct = (data) => {
  */
 export const deleteProduct = (data) => {
   return service({
-    url: '/ffproduction/product',
+    url: '/ffProduct/deleteProduct',
     method: 'delete',
     data
   })
@@ -46,7 +46,7 @@ export const deleteProduct = (data) => {
  */
 export const deleteProductByIds = (data) => {
   return service({
-    url: '/ffproduction/productByIds',
+    url: '/ffProduct/deleteProductByIds',
     method: 'delete',
     data
   })
@@ -59,7 +59,7 @@ export const deleteProductByIds = (data) => {
  */
 export const getProduct = (params) => {
   return service({
-    url: '/ffproduction/product',
+    url: '/ffProduct/getProduct',
     method: 'get',
     params
   })
@@ -79,7 +79,7 @@ export const getProduct = (params) => {
  */
 export const getProductList = (params) => {
   return service({
-    url: '/ffproduction/productList',
+    url: '/ffProduct/getProductList',
     method: 'get',
     params
   })

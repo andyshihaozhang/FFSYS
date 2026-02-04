@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <div class="gva-search-box">
       <el-form
         ref="elSearchFormRef"

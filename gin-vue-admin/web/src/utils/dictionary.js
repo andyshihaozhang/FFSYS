@@ -91,3 +91,21 @@ export const showDictLabel = (
   })
   return Reflect.has(dictMap, code) ? dictMap[code] : ''
 }
+
+//  字典指定对象获取方法
+export const getDictObjByValue = (
+  dict,
+  code,
+  keyCode = 'value',
+  valueCode = 'label'
+) => {
+  if (!dict) {
+    return ''
+  }
+  dict.forEach((item) => {
+    if (Reflect.has(item, keyCode) && Reflect.has(item, valueCode) && item[keyCode] === code) {
+      return item
+    }
+  })
+  return ''
+}

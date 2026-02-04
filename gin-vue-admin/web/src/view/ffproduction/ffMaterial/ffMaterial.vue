@@ -23,11 +23,11 @@
           <div class="px-2 pt-1 pb-1">
             <div
               v-for="product in filteredProducts"
-              :key="product.id"
+              :key="product.ID"
               class="product-item flex items-center justify-between p-3 mb-2 bg-gray-50 rounded-md cursor-pointer transition-all hover:bg-gray-100 hover:shadow-md hover:-translate-y-0.5"
               :class="{
-                'border-2 border-blue-500 shadow-lg bg-blue-50 -translate-y-0.5': selectedProduct?.id === product.id,
-                'border-2 border-transparent': selectedProduct?.id !== product.id
+                'border-2 border-blue-500 shadow-lg bg-blue-50 -translate-y-0.5': selectedProduct?.ID === product.ID,
+                'border-2 border-transparent': selectedProduct?.ID !== product.ID
               }"
               @click="selectProduct(product)"
             >
@@ -38,17 +38,12 @@
               <div class="text-xs text-gray-500 mb-1.5">款号: {{ product.productCode }}</div>
               <div class="flex gap-1">
                 <el-tag size="small">{{ product.productColor }}</el-tag>
-                <el-tag
-                  :type="getProductFlagType(product.productFlag)"
-                  size="small"
-                >
-                  {{ product.productFlag }}
-                </el-tag>
+                <FfDicTag dicType="productFlag" :dicValue="product.productFlag" />
               </div>
             </div>
             <el-icon
               class="text-base text-gray-400 transition-all"
-              :class="{ 'text-blue-500': selectedProduct?.id === product.id }"
+              :class="{ 'text-blue-500': selectedProduct?.ID === product.ID }"
             >
               <ArrowRight />
             </el-icon>
@@ -88,12 +83,12 @@
           <el-table
             v-loading="materialLoading"
             :data="materialData"
-            row-key="id"
+            row-key="ID"
             border
             stripe
             height="calc(100vh - 240px)"
           >
-            <el-table-column prop="id" label="ID" width="80" align="center" />
+            <el-table-column prop="ID" label="ID" width="80" align="center" />
             <el-table-column
               prop="materialName"
               label="物料名称"
@@ -302,288 +297,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { useAppStore } from '@/pinia'
 import FfDrawer from '@/components/ffDrawer/index.vue'
+import FfDicTag from '@/components/ffDicTag/index.vue'
+import { getProductList } from '@/api/ffProduct'
+import { getMaterialList, createMaterial, updateMaterial, deleteMaterial } from '@/api/ffMaterial'
 
 defineOptions({
   name: 'FfMaterial'
 })
 
 const appStore = useAppStore()
-
-// ==================== 模拟数据 ====================
-// 模拟产品数据
-const mockProducts = [
-  {
-    id: 1,
-    productCode: 'P001',
-    productName: '春季新款连衣裙',
-    productColor: '蓝色',
-    productImg: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-    accountId: 1001,
-    productOrderNum: 100,
-    productFlag: '生产中'
-  },
-  {
-    id: 2,
-    productCode: 'P002',
-    productName: '夏季短袖T恤',
-    productColor: '白色',
-    productImg: 'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
-    accountId: 1002,
-    productOrderNum: 200,
-    productFlag: '未生产'
-  },
-  {
-    id: 3,
-    productCode: 'P003',
-    productName: '秋季卫衣',
-    productColor: '灰色',
-    productImg: '',
-    accountId: 1001,
-    productOrderNum: 150,
-    productFlag: '已完成'
-  },
-  {
-    id: 4,
-    productCode: 'P004',
-    productName: '冬季羽绒服',
-    productColor: '黑色',
-    productImg: 'https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg',
-    accountId: 1003,
-    productOrderNum: 80,
-    productFlag: '生产中'
-  },
-  {
-    id: 5,
-    productCode: 'P005',
-    productName: '牛仔裤',
-    productColor: '深蓝',
-    productImg: '',
-    accountId: 1002,
-    productOrderNum: 120,
-    productFlag: '未生产'
-  }
-]
-
-// 模拟物料数据（按产品ID存储）
-const mockMaterial = {
-  1: [ // 产品ID为1的工序
-    {
-      id: 1,
-      productId: 1,
-      materialName: '高档真丝面料',
-      materialColor: '蓝色',
-      materialUsage: 2.5,
-      materialUom: '米',
-      materialPrice: 158.00,
-      materialspecification: '114cm×100cm',
-      materialType: '主料',
-      supplierId: 'S001'
-    },
-    {
-      id: 2,
-      productId: 1,
-      materialName: '拉链',
-      materialColor: '银色',
-      materialUsage: 1,
-      materialUom: '条',
-      materialPrice: 3.50,
-      materialspecification: '50cm',
-      materialType: '辅料',
-      supplierId: 'S002'
-    },
-    {
-      id: 3,
-      productId: 1,
-      materialName: '纽扣',
-      materialColor: '白色',
-      materialUsage: 5,
-      materialUom: '个',
-      materialPrice: 0.80,
-      materialspecification: '直径1.2cm',
-      materialType: '辅料',
-      supplierId: 'S003'
-    },
-    {
-      id: 4,
-      productId: 1,
-      materialName: '缝纫线',
-      materialColor: '蓝色',
-      materialUsage: 200,
-      materialUom: '米',
-      materialPrice: 0.05,
-      materialspecification: '40/2',
-      materialType: '辅料',
-      supplierId: 'S002'
-    }
-  ],
-  2: [
-    {
-      id: 5,
-      productId: 2,
-      materialName: '纯棉针织布',
-      materialColor: '白色',
-      materialUsage: 1.2,
-      materialUom: '米',
-      materialPrice: 28.00,
-      materialspecification: '160cm宽',
-      materialType: '主料',
-      supplierId: 'S001'
-    },
-    {
-      id: 6,
-      productId: 2,
-      materialName: '印花浆料',
-      materialColor: '彩色',
-      materialUsage: 0.1,
-      materialUom: '千克',
-      materialPrice: 45.00,
-      materialspecification: '水性环保',
-      materialType: '辅料',
-      supplierId: 'S004'
-    },
-    {
-      id: 7,
-      productId: 2,
-      materialName: '领标',
-      materialColor: '白色',
-      materialUsage: 1,
-      materialUom: '张',
-      materialPrice: 0.50,
-      materialspecification: '5cm×2cm',
-      materialType: '辅料',
-      supplierId: 'S003'
-    }
-  ],
-  3: [
-    {
-      id: 8,
-      productId: 3,
-      materialName: '卫衣面料',
-      materialColor: '灰色',
-      materialUsage: 1.8,
-      materialUom: '米',
-      materialPrice: 35.00,
-      materialspecification: '180cm宽加厚',
-      materialType: '主料',
-      supplierId: 'S001'
-    },
-    {
-      id: 9,
-      productId: 3,
-      materialName: '绣花线',
-      materialColor: '金色',
-      materialUsage: 50,
-      materialUom: '米',
-      materialPrice: 0.15,
-      materialspecification: '120D/2',
-      materialType: '辅料',
-      supplierId: 'S002'
-    },
-    {
-      id: 10,
-      productId: 3,
-      materialName: '帽绳',
-      materialColor: '灰色',
-      materialUsage: 1.5,
-      materialUom: '米',
-      materialPrice: 2.00,
-      materialspecification: '0.8cm圆绳',
-      materialType: '辅料',
-      supplierId: 'S003'
-    }
-  ],
-  4: [
-    {
-      id: 11,
-      productId: 4,
-      materialName: '防水尼龙布',
-      materialColor: '黑色',
-      materialUsage: 3.0,
-      materialUom: '米',
-      materialPrice: 55.00,
-      materialspecification: '150cm宽防水',
-      materialType: '主料',
-      supplierId: 'S005'
-    },
-    {
-      id: 12,
-      productId: 4,
-      materialName: '90%白鸭绒',
-      materialColor: '白色',
-      materialUsage: 0.25,
-      materialUom: '千克',
-      materialPrice: 280.00,
-      materialspecification: '90绒10毛',
-      materialType: '填充料',
-      supplierId: 'S006'
-    },
-    {
-      id: 13,
-      productId: 4,
-      materialName: '金属拉链',
-      materialColor: '黑色',
-      materialUsage: 1,
-      materialUom: '条',
-      materialPrice: 8.50,
-      materialspecification: '70cm双向',
-      materialType: '辅料',
-      supplierId: 'S002'
-    },
-    {
-      id: 14,
-      productId: 4,
-      materialName: '内衬布',
-      materialColor: '黑色',
-      materialUsage: 2.5,
-      materialUom: '米',
-      materialPrice: 12.00,
-      materialspecification: '150cm宽',
-      materialType: '里料',
-      supplierId: 'S001'
-    }
-  ],
-  5: [
-    {
-      id: 15,
-      productId: 5,
-      materialName: '牛仔布',
-      materialColor: '深蓝',
-      materialUsage: 1.5,
-      materialUom: '米',
-      materialPrice: 32.00,
-      materialspecification: '148cm宽12盎司',
-      materialType: '主料',
-      supplierId: 'S001'
-    },
-    {
-      id: 16,
-      productId: 5,
-      materialName: '铜质五爪扣',
-      materialColor: '古铜色',
-      materialUsage: 1,
-      materialUom: '套',
-      materialPrice: 1.20,
-      materialspecification: '17mm',
-      materialType: '辅料',
-      supplierId: 'S003'
-    },
-    {
-      id: 17,
-      productId: 5,
-      materialName: '口袋布',
-      materialColor: '白色',
-      materialUsage: 0.3,
-      materialUom: '米',
-      materialPrice: 8.00,
-      materialspecification: '斜纹布',
-      materialType: '辅料',
-      supplierId: 'S001'
-    }
-  ]
-}
-
-// 用于生成新工序ID
-let nextmaterialId = 18
 
 // ==================== 产品相关 ====================
 const productLoading = ref(false)
@@ -604,16 +326,6 @@ const filteredProducts = computed(() => {
   )
 })
 
-// 获取生产标志标签类型
-const getProductFlagType = (flag) => {
-  const typeMap = {
-    未生产: 'info',
-    生产中: 'warning',
-    已完成: 'success'
-  }
-  return typeMap[flag] || 'info'
-}
-
 // 产品搜索
 const handleProductSearch = () => {
   // 搜索是通过计算属性实现的，这里可以添加额外逻辑
@@ -625,13 +337,16 @@ const selectProduct = (product) => {
   getmaterialData()
 }
 
-// 获取产品列表（使用模拟数据）
+// 获取产品列表（使用真实API）
 const getProductData = async () => {
   productLoading.value = true
   try {
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 300))
-    productData.value = [...mockProducts]
+    const res = await getProductList({ page: 1, pageSize: 100 })
+    if (res.code === 0) {
+      productData.value = res.data.list
+    } else {
+      ElMessage.error('获取产品列表失败')
+    }
   } catch (error) {
     ElMessage.error('获取产品列表失败')
   } finally {
@@ -648,7 +363,7 @@ const dialogVisible = ref(false)
 const dialogType = ref('add') // 'add' | 'edit'
 const formRef = ref(null)
 const formData = ref({
-    id: null,
+    ID: null,
     productId: null,
     materialName: '',
     materialColor: '',
@@ -672,7 +387,7 @@ const formRules = reactive({
   ]
 })
 
-// 获取物料数据（使用模拟数据）
+// 获取物料数据（使用真实API）
 const getmaterialData = async () => {
   if (!selectedProduct.value) {
     materialData.value = []
@@ -681,10 +396,17 @@ const getmaterialData = async () => {
 
   materialLoading.value = true
   try {
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 300))
-    const productId = selectedProduct.value.id
-    materialData.value = mockMaterial[productId] ? [...mockMaterial[productId]] : []
+    const res = await getMaterialList({
+      productId: selectedProduct.value.ID,
+      page: 1,
+      pageSize: 100
+    })
+    if (res.code === 0) {
+      materialData.value = res.data.list || []
+    } else {
+      ElMessage.error('获取物料列表失败')
+      materialData.value = []
+    }
   } catch (error) {
     ElMessage.error('获取物料列表失败')
     materialData.value = []
@@ -703,19 +425,20 @@ const openDialog = (type, row = null) => {
   dialogType.value = type
   if (type === 'add') {
     formData.value = {
-      id: null,
-      productId: selectedProduct.value.id,
+      ID: null,
+      productId: selectedProduct.value.ID,
+      materialName: '',
       materialColor: '',
-        materialUsage: null,
-        materialUom: '',
-        materialPrice: null,
-        materialspecification: '',
-        materialType: '',
-        supplierId: ''
+      materialUsage: null,
+      materialUom: '',
+      materialPrice: null,
+      materialspecification: '',
+      materialType: '',
+      supplierId: ''
     }
   } else {
     formData.value = {
-      id: row.id,
+      ID: row.ID,
       productId: row.productId,
       materialName: row.materialName,
       materialColor: row.materialColor,
@@ -736,64 +459,36 @@ const closeDialog = () => {
   dialogVisible.value = false
 }
 
-// 提交表单（使用模拟数据）
+// 提交表单（使用真实API）
 const handleSubmit = async () => {
   const valid = await formRef.value?.validate()
   if (!valid) return
 
   try {
     materialLoading.value = true
-    // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    const productId = selectedProduct.value.id
-
-    if (dialogType.value === 'add') {
-      // 新增物料
-      const newmaterial = {
-        id: nextmaterialId++,
-        productId: productId,
-        materialName: formData.value.materialName,
-        materialColor: formData.value.materialColor,
-        materialUsage: formData.value.materialUsage,
-        materialUom: formData.value.materialUom,
-        materialPrice: formData.value.materialPrice,
-        materialspecification: formData.value.materialspecification,
-        materialType: formData.value.materialType,
-        supplierId: formData.value.supplierId
-      }
-
-      if (!mockMaterial[productId]) {
-        mockMaterial[productId] = []
-      }
-      mockMaterial[productId].push(newmaterial)
-
-      ElMessage.success('新增成功')
-    } else {
-      // 编辑物料
-      const materialList = mockMaterial[productId]
-      if (materialList) {
-        const index = materialList.findIndex(op => op.id === formData.value.id)
-        if (index !== -1) {
-          materialList[index] = {
-            ...materialList[index],
-            materialName: formData.value.materialName,
-            materialColor: formData.value.materialColor,
-            materialUsage: formData.value.materialUsage,
-            materialUom: formData.value.materialUom,
-            materialPrice: formData.value.materialPrice,
-            materialspecification: formData.value.materialspecification,
-            materialType: formData.value.materialType,
-            supplierId: formData.value.supplierId
-          }
-        }
-      }
-
-      ElMessage.success('更新成功')
+    const data = {
+      ...formData.value,
+      productId: selectedProduct.value.ID
     }
 
-    closeDialog()
-    getmaterialData()
+    if (dialogType.value === 'add') {
+      delete data.ID
+    }
+
+    let res
+    if (dialogType.value === 'add') {
+      res = await createMaterial(data)
+    } else {
+      res = await updateMaterial(data)
+    }
+
+    if (res.code === 0) {
+      ElMessage.success(res.msg)
+      closeDialog()
+      getmaterialData()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
+    }
   } catch (error) {
     ElMessage.error('操作失败')
   } finally {
@@ -801,7 +496,7 @@ const handleSubmit = async () => {
   }
 }
 
-// 删除物料（使用模拟数据）
+// 删除物料（使用真实API）
 const handleDelete = (row) => {
   ElMessageBox.confirm(
     `确定要删除物料 "${row.materialName}" 吗？`,
@@ -815,21 +510,13 @@ const handleDelete = (row) => {
     .then(async () => {
       try {
         materialLoading.value = true
-        // 模拟API延迟
-        await new Promise(resolve => setTimeout(resolve, 300))
-
-        const productId = selectedProduct.value.id
-        const materialList = mockMaterial[productId]
-
-        if (materialList) {
-          const index = materialList.findIndex(op => op.id === row.id)
-          if (index !== -1) {
-            materialList.splice(index, 1)
-          }
+        const res = await deleteMaterial({ ID: row.ID })
+        if (res.code === 0) {
+          ElMessage.success(res.msg)
+          getmaterialData()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
         }
-
-        ElMessage.success('删除成功')
-        getmaterialData()
       } catch (error) {
         ElMessage.error('删除失败')
       } finally {

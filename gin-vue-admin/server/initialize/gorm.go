@@ -3,9 +3,10 @@ package initialize
 import (
 	"os"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	"gin-vue-admin/server/global"
+	"gin-vue-admin/server/model/example"
+	"gin-vue-admin/server/model/ffproduction"
+	"gin-vue-admin/server/model/system"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -63,6 +64,13 @@ func RegisterTables() {
 		system.SysParams{},
 		system.SysVersion{},
 		system.SysError{},
+
+		ffproduction.FfProduct{},
+		ffproduction.FfEmployee{},
+		ffproduction.FfAccount{},
+		ffproduction.FfMaterial{},
+		ffproduction.FfOperation{},
+		ffproduction.FfOperationAssignment{},
 
 		example.ExaFile{},
 		example.ExaCustomer{},

@@ -49,13 +49,16 @@
                 <div class="text-gray-400 text-sm mt-2">支持jpg、png格式，大小不超过2MB</div>
             </el-form-item>
 
-            <el-form-item label="客户ID"
+            <el-form-item label="客户"
                 prop="accountId">
-                <el-input-number v-model="formData.accountId"
-                    :min="1"
-                    controls-position="right"
-                    style="width: 100%"
-                    placeholder="请输入客户ID" />
+                <el-select v-model="formData.accountId"
+                    placeholder="请选择客户"
+                    style="width: 100%">
+                    <el-option v-for="item in props.accountOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value" />
+                </el-select>
             </el-form-item>
 
             <el-form-item label="下单数量"
@@ -69,16 +72,10 @@
 
             <el-form-item label="生产标志"
                 prop="productFlag">
-                <el-select v-model="formData.productFlag"
+                <FfDicSelect v-model="formData.productFlag"
+                    dicType="productFlag"
                     placeholder="请选择生产标志"
-                    style="width: 100%">
-                    <el-option label="未生产"
-                        value="未生产" />
-                    <el-option label="生产中"
-                        value="生产中" />
-                    <el-option label="已完成"
-                        value="已完成" />
-                </el-select>
+                    style="width: 100%" />
             </el-form-item>
         </el-form>
     </FfDrawer>
@@ -90,6 +87,7 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { useUserStore } from '@/pinia'
 import FfDrawer from '@/components/ffDrawer/index.vue'
+import FfDicSelect from '@/components/ffDicSelect/index.vue'
 
 defineOptions({
   name: 'ProductDrawer'
@@ -103,6 +101,10 @@ const props = defineProps({
   data: {
     type: Object,
     default: () => null
+  },
+  accountOptions: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -112,21 +114,21 @@ const userStore = useUserStore()
 
 // 默认表单数据
 const getDefaultFormData = () => ({
-  id: null,
+  ID: null,
   productCode: '',
   productName: '',
   productColor: '',
   productImg: '',
   accountId: null,
   productOrderNum: null,
-  productFlag: '未生产'
+  productFlag: 1
 })
 
 const formRef = ref(null)
 const formData = ref(getDefaultFormData())
 
 // 是否为编辑模式
-const isEdit = computed(() => !!props.data?.id)
+const isEdit = computed(() => !!props.data?.ID)
 
 // 双向绑定 visible
 const visible = computed({
@@ -171,7 +173,7 @@ const formRules = {
   productColor: [
     { required: true, message: '请输入产品颜色', trigger: 'blur' }
   ],
-  accountId: [{ required: true, message: '请输入客户ID', trigger: 'blur' }],
+  accountId: [{ required: true, message: '请选择客户', trigger: 'change' }],
   productOrderNum: [
     { required: true, message: '请输入下单数量', trigger: 'blur' },
     { type: 'number', min: 1, message: '下单数量必须大于0', trigger: 'blur' }

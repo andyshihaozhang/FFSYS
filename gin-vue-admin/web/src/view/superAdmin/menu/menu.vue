@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button type="primary" icon="plus" @click="addMenu(0)">

@@ -54,15 +54,15 @@
                 >
                   <div class="flex items-center gap-2">
                     <el-icon><location /></el-icon>
-                    <span>中国·北京市·朝阳区</span>
+                    <span>中国·安徽省·池州市</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <el-icon><office-building /></el-icon>
-                    <span>北京翻转极光科技有限公司</span>
+                    <span>FF股份有限公司</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <el-icon><user /></el-icon>
-                    <span>技术部·前端事业群</span>
+                    <span>生产部-生产经理</span>
                   </div>
                 </div>
               </div>
@@ -136,23 +136,6 @@
                 修改
               </el-button>
             </div>
-          </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-800 rounded-xl p-6 profile-card">
-          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-            <el-icon class="text-blue-500"><medal /></el-icon>
-            技能特长
-          </h2>
-          <div class="flex flex-wrap gap-2">
-            <el-tag effect="plain" type="success">GoLang</el-tag>
-            <el-tag effect="plain" type="warning">JavaScript</el-tag>
-            <el-tag effect="plain" type="danger">Vue</el-tag>
-            <el-tag effect="plain" type="info">Gorm</el-tag>
-            <el-button link class="text-sm">
-              <el-icon><plus /></el-icon>
-              添加技能
-            </el-button>
           </div>
         </div>
       </div>

@@ -2,9 +2,10 @@ package system
 
 import (
 	"context"
-	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+
+	sysModel "gin-vue-admin/server/model/system"
+	"gin-vue-admin/server/service/system"
+	"gin-vue-admin/server/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -51,29 +52,19 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 		apStr = "123456"
 	}
 
-	password := utils.BcryptHash(apStr)
 	adminPassword := utils.BcryptHash(apStr)
 
 	entities := []sysModel.SysUser{
 		{
 			UUID:        uuid.New(),
-			Username:    "admin",
+			Username:    "zsh",
 			Password:    adminPassword,
-			NickName:    "Mr.奇淼",
+			NickName:    "Andy",
 			HeaderImg:   "https://qmplusimg.henrongyi.top/gva_header.jpg",
 			AuthorityId: 888,
-			Phone:       "17611111111",
-			Email:       "333333333@qq.com",
+			Phone:       "00000000000",
+			Email:       "0000000000@qq.com",
 		},
-		{
-			UUID:        uuid.New(),
-			Username:    "a303176530",
-			Password:    password,
-			NickName:    "用户1",
-			HeaderImg:   "https://qmplusimg.henrongyi.top/1572075907logo.png",
-			AuthorityId: 9528,
-			Phone:       "17611111111",
-			Email:       "333333333@qq.com"},
 	}
 	if err = db.Create(&entities).Error; err != nil {
 		return ctx, errors.Wrap(err, sysModel.SysUser{}.TableName()+"表数据初始化失败!")

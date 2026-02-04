@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <div class="gva-search-box">
       <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline"
         @keyup.enter="onSubmit">

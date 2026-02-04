@@ -24,16 +24,16 @@
         v-if="config.side_mode === 'combination' && device !== 'mobile'"
         mode="normal"
       />
-      <div class="flex-1 w-0 h-full">
+      <div class="flex-1 w-0 h-full flex flex-col">
         <gva-tabs v-if="config.showTabs" />
         <div
-          class="overflow-auto px-2"
+          class="overflow-auto px-2 flex-1 flex flex-col"
           :class="config.showTabs ? 'gva-container2' : 'gva-container pt-1'"
         >
           <router-view v-if="reloadFlag" v-slot="{ Component, route }">
             <div
               id="gva-base-load-dom"
-              class="gva-body-h bg-gray-50 dark:bg-slate-800"
+              class="gva-body-h bg-gray-50 dark:bg-slate-800 flex flex-col flex-1"
             >
               <transition
                 mode="out-in"

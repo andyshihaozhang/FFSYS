@@ -4,7 +4,7 @@
         :size="drawerSize"
         :show-close="false"
         :close-on-press-escape="false"
-        :close-on-click-modal="false"
+        :close-on-click-modal="props.closeOnClickModal"
         :destroy-on-close="destroyOnClose">
         <template #header>
             <div class="flex justify-between items-center">
@@ -60,6 +60,10 @@ const props = defineProps({
   destroyOnClose: {
     type: Boolean,
     default: false
+  },
+  closeOnClickModal: {
+    type: Boolean,
+    default: true
   }
 })
 

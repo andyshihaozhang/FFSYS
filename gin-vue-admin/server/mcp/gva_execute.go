@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	model "github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils"
+	model "gin-vue-admin/server/model/system"
+	"gin-vue-admin/server/utils"
 	"strings"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"gin-vue-admin/server/global"
+	"gin-vue-admin/server/model/system/request"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/service"
+	"gin-vue-admin/server/service"
 	"github.com/mark3labs/mcp-go/mcp"
 	"go.uber.org/zap"
 )

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/common"
+	"gin-vue-admin/server/model/common"
 	"math/rand"
 	"reflect"
 	"strings"

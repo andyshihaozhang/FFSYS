@@ -2,8 +2,8 @@ package example
 
 import (
 	"errors"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/example"
+	"gin-vue-admin/server/global"
+	"gin-vue-admin/server/model/example"
 	"gorm.io/gorm"
 )
 

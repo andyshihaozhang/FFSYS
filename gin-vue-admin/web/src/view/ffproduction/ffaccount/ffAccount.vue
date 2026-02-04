@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="ff-custom-panel">
         <!-- 搜索区域 -->
         <div class="gva-search-box">
             <el-form ref="searchFormRef"
@@ -40,10 +40,10 @@
 
             <el-table v-loading="loading"
                 :data="tableData"
-                row-key="id"
+                row-key="ID"
                 border
                 stripe>
-                <el-table-column prop="id"
+                <el-table-column prop="ID"
                     label="序号"
                     width="80"
                     align="center" />
@@ -83,8 +83,8 @@
 
             <!-- 分页 -->
             <div class="gva-pagination">
-                <el-pagination v-model:current-page="page"
-                    v-model:page-size="pageSize"
+                <el-pagination :current-page="page"
+                    :page-size="pageSize"
                     :page-sizes="[10, 20, 50, 100]"
                     :total="total"
                     layout="total, sizes, prev, pager, next, jumper"
@@ -105,6 +105,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '@/pinia'
 import AccountDrawer from './components/AccountDrawer.vue'
+import { getAccountList, createAccount, updateAccount, deleteAccount } from '@/api/ffAccount'
 
 defineOptions({
   name: 'FfAccount'
@@ -131,81 +132,6 @@ const searchInfo = ref({
 const drawerVisible = ref(false)
 const drawerData = ref(null)
 
-// ==================== API 调用 (模拟数据) ====================
-const getAccountList = async (params) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  const mockData = [
-    {
-      id: 1,
-      accountName: '张三公司',
-      phone: '13800138001',
-      address: '北京市朝阳区建国路88号'
-    },
-    {
-      id: 2,
-      accountName: '李四企业',
-      phone: '13800138002',
-      address: '上海市浦东新区世纪大道100号'
-    },
-    {
-      id: 3,
-      accountName: '王五集团',
-      phone: '13800138003',
-      address: '广州市天河区体育西路189号'
-    },
-    {
-      id: 4,
-      accountName: '赵六商贸',
-      phone: '13800138004',
-      address: '深圳市南山区科技园南区'
-    },
-    {
-      id: 5,
-      accountName: '孙七有限公司',
-      phone: '13800138005',
-      address: '杭州市西湖区文一西路88号'
-    }
-  ]
-
-  let filteredData = mockData.filter((item) => {
-    if (params.accountName && !item.accountName.includes(params.accountName))
-      return false
-    if (params.phone && !item.phone.includes(params.phone)) return false
-    if (params.address && !item.address.includes(params.address)) return false
-    return true
-  })
-
-  const start = (params.page - 1) * params.pageSize
-  const end = start + params.pageSize
-
-  return {
-    code: 0,
-    data: {
-      list: filteredData.slice(start, end),
-      total: filteredData.length,
-      page: params.page,
-      pageSize: params.pageSize
-    },
-    msg: '查询成功'
-  }
-}
-
-const createAccount = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '创建成功' }
-}
-
-const updateAccount = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '更新成功' }
-}
-
-const deleteAccount = async (_id) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '删除成功' }
-}
-
 // ==================== 业务逻辑 ====================
 const getTableData = async () => {
   loading.value = true
@@ -221,6 +147,8 @@ const getTableData = async () => {
       total.value = res.data.total
       page.value = res.data.page
       pageSize.value = res.data.pageSize
+    } else {
+      ElMessage.error(res.msg || '获取数据失败')
     }
   } catch (error) {
     ElMessage.error('获取数据失败')
@@ -276,6 +204,8 @@ const handleDrawerSuccess = async (formData, isEdit) => {
       ElMessage.success(res.msg)
       drawerVisible.value = false
       getTableData()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
     }
   } catch (error) {
     ElMessage.error('操作失败')
@@ -294,10 +224,12 @@ const handleDelete = (row) => {
     .then(async () => {
       try {
         loading.value = true
-        const res = await deleteAccount(row.id)
+        const res = await deleteAccount({ ID: row.ID })
         if (res.code === 0) {
           ElMessage.success(res.msg)
           getTableData()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
         }
       } catch (error) {
         ElMessage.error('删除失败')
@@ -305,9 +237,7 @@ const handleDelete = (row) => {
         loading.value = false
       }
     })
-    .catch(() => {
-      // 用户取消删除
-    })
+    .catch(() => {})
 }
 
 // ==================== 生命周期 ====================

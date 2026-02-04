@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="ff-custom-panel">
         <!-- 搜索区域 -->
         <div class="gva-search-box">
             <el-form ref="searchFormRef"
@@ -16,36 +16,22 @@
                         clearable />
                 </el-form-item>
                 <el-form-item label="性别">
-                    <el-select v-model="searchInfo.sex"
+                    <FfDicSelect v-model="searchInfo.sex"
+                        dicType="gender"
                         placeholder="请选择性别"
-                        clearable>
-                        <el-option label="男"
-                            value="男" />
-                        <el-option label="女"
-                            value="女" />
-                    </el-select>
+                        clearable />
                 </el-form-item>
                 <el-form-item label="角色">
-                    <el-select v-model="searchInfo.authorityIds"
+                    <FfDicSelect v-model="searchInfo.authorityIds"
+                        dicType="employeeAuthority"
                         placeholder="请选择角色"
-                        clearable>
-                        <el-option label="组长"
-                            value="组长" />
-                        <el-option label="员工"
-                            value="员工" />
-                    </el-select>
+                        clearable />
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-select v-model="searchInfo.employeeStatus"
+                    <FfDicSelect v-model="searchInfo.employeeStatus"
+                        dicType="employeeStatus"
                         placeholder="请选择状态"
-                        clearable>
-                        <el-option label="在职"
-                            value="在职" />
-                        <el-option label="离职"
-                            value="离职" />
-                        <el-option label="休假"
-                            value="休假" />
-                    </el-select>
+                        clearable />
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary"
@@ -67,10 +53,10 @@
 
             <el-table v-loading="loading"
                 :data="tableData"
-                row-key="id"
+                row-key="ID"
                 border
                 stripe>
-                <el-table-column prop="id"
+                <el-table-column prop="ID"
                     label="序号"
                     width="80"
                     align="center" />
@@ -91,10 +77,7 @@
                     width="80"
                     align="center">
                     <template #default="{ row }">
-                        <el-tag :type="row.sex === '男' ? 'primary' : 'danger'"
-                            size="small">
-                            {{ row.sex }}
-                        </el-tag>
+                        <FfDicTag dicType="gender" :dicValue="row.sex" />
                     </template>
                 </el-table-column>
                 <el-table-column prop="authorityIds"
@@ -102,10 +85,7 @@
                     width="80"
                     align="center">
                     <template #default="{ row }">
-                        <el-tag :type="row.authorityIds === '组长' ? 'warning' : 'info'"
-                            size="small">
-                            {{ row.authorityIds }}
-                        </el-tag>
+                        <FfDicTag dicType="employeeAuthority" :dicValue="row.authorityIds" />
                     </template>
                 </el-table-column>
                 <el-table-column prop="employeeStatus"
@@ -113,10 +93,7 @@
                     width="80"
                     align="center">
                     <template #default="{ row }">
-                        <el-tag :type="getStatusType(row.employeeStatus)"
-                            size="small">
-                            {{ row.employeeStatus }}
-                        </el-tag>
+                        <FfDicTag dicType="employeeStatus" :dicValue="row.employeeStatus" />
                     </template>
                 </el-table-column>
                 <el-table-column label="操作"
@@ -142,8 +119,8 @@
 
             <!-- 分页 -->
             <div class="gva-pagination">
-                <el-pagination v-model:current-page="page"
-                    v-model:page-size="pageSize"
+                <el-pagination :current-page="page"
+                    :page-size="pageSize"
                     :page-sizes="[10, 20, 50, 100]"
                     :total="total"
                     layout="total, sizes, prev, pager, next, jumper"
@@ -164,6 +141,9 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '@/pinia'
 import EmployeeDrawer from './components/EmployeeDrawer.vue'
+import FfDicTag from '@/components/ffDicTag/index.vue'
+import FfDicSelect from '@/components/ffDicSelect/index.vue'
+import { getEmployeeList, createEmployee, updateEmployee, deleteEmployee } from '@/api/ffEmployee'
 
 defineOptions({
   name: 'FfEmployee'
@@ -183,118 +163,14 @@ const searchFormRef = ref(null)
 const searchInfo = ref({
   employeeName: '',
   phone: '',
-  sex: '',
-  authorityIds: '',
-  employeeStatus: ''
+  sex: null,
+  authorityIds: null,
+  employeeStatus: null
 })
 
 // 抽屉相关
 const drawerVisible = ref(false)
 const drawerData = ref(null)
-
-// ==================== 工具函数 ====================
-const getStatusType = (status) => {
-  const typeMap = {
-    在职: 'success',
-    离职: 'info',
-    休假: 'warning'
-  }
-  return typeMap[status] || 'info'
-}
-
-// ==================== API 调用 (模拟数据) ====================
-const getEmployeeList = async (params) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  const mockData = [
-    {
-      id: 1,
-      employeeName: '张三',
-      phone: '13800138001',
-      age: 28,
-      sex: '男',
-      authorityIds: '组长',
-      employeeStatus: '在职'
-    },
-    {
-      id: 2,
-      employeeName: '李四',
-      phone: '13800138002',
-      age: 25,
-      sex: '男',
-      authorityIds: '员工',
-      employeeStatus: '在职'
-    },
-    {
-      id: 3,
-      employeeName: '王五',
-      phone: '13800138003',
-      age: 30,
-      sex: '女',
-      authorityIds: '员工',
-      employeeStatus: '休假'
-    },
-    {
-      id: 4,
-      employeeName: '赵六',
-      phone: '13800138004',
-      age: 32,
-      sex: '男',
-      authorityIds: '组长',
-      employeeStatus: '在职'
-    },
-    {
-      id: 5,
-      employeeName: '孙七',
-      phone: '13800138005',
-      age: 27,
-      sex: '女',
-      authorityIds: '员工',
-      employeeStatus: '离职'
-    }
-  ]
-
-  let filteredData = mockData.filter((item) => {
-    if (params.employeeName && !item.employeeName.includes(params.employeeName))
-      return false
-    if (params.phone && !item.phone.includes(params.phone)) return false
-    if (params.sex && item.sex !== params.sex) return false
-    if (params.authorityIds && item.authorityIds !== params.authorityIds)
-      return false
-    if (params.employeeStatus && item.employeeStatus !== params.employeeStatus)
-      return false
-    return true
-  })
-
-  const start = (params.page - 1) * params.pageSize
-  const end = start + params.pageSize
-
-  return {
-    code: 0,
-    data: {
-      list: filteredData.slice(start, end),
-      total: filteredData.length,
-      page: params.page,
-      pageSize: params.pageSize
-    },
-    msg: '查询成功'
-  }
-}
-
-const createEmployee = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '创建成功' }
-}
-
-const updateEmployee = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '更新成功' }
-}
-
-const deleteEmployee = async (_id) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '删除成功' }
-}
 
 // ==================== 业务逻辑 ====================
 const getTableData = async () => {
@@ -329,9 +205,9 @@ const onReset = () => {
   searchInfo.value = {
     employeeName: '',
     phone: '',
-    sex: '',
-    authorityIds: '',
-    employeeStatus: ''
+    sex: null,
+    authorityIds: null,
+    employeeStatus: null
   }
   page.value = 1
   getTableData()
@@ -368,6 +244,8 @@ const handleDrawerSuccess = async (formData, isEdit) => {
       ElMessage.success(res.msg)
       drawerVisible.value = false
       getTableData()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
     }
   } catch (error) {
     ElMessage.error('操作失败')
@@ -390,10 +268,12 @@ const handleDelete = (row) => {
     .then(async () => {
       try {
         loading.value = true
-        const res = await deleteEmployee(row.id)
+        const res = await deleteEmployee({ ID: row.ID })
         if (res.code === 0) {
           ElMessage.success(res.msg)
           getTableData()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
         }
       } catch (error) {
         ElMessage.error('删除失败')

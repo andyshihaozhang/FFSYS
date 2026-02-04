@@ -110,3 +110,11 @@ export const importSysDictionary = (data) => {
     data
   })
 }
+
+export const getDictionaryTreeListByType = (dictType) => {
+  return service({
+    url: '/sysDictionaryDetail/getDictionaryTreeListByType',
+    method: 'get',
+    params: { type: dictType }
+  })
+}

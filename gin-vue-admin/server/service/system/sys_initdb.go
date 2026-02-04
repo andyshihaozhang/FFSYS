@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
-	"gorm.io/gorm"
 	"sort"
+
+	"gin-vue-admin/server/global"
+	"gin-vue-admin/server/model/system/request"
+	"gorm.io/gorm"
 )
 
 const (
@@ -34,6 +35,7 @@ var (
 	ErrDBTypeMismatch          = errors.New("db type mismatch")
 )
 
+// 抽象接口 定义统一的初始化接口 由各个模块实现具体初始化流程
 // SubInitializer 提供 source/*/init() 使用的接口，每个 initializer 完成一个初始化过程
 type SubInitializer interface {
 	InitializerName() string // 不一定代表单独一个表，所以改成了更宽泛的语义
@@ -43,6 +45,7 @@ type SubInitializer interface {
 	DataInserted(ctx context.Context) bool
 }
 
+// 抽象接口 定义数据库初始化步骤 由各个数据库实现具体初始化流程
 // TypedDBInitHandler 执行传入的 initializer
 type TypedDBInitHandler interface {
 	EnsureDB(ctx context.Context, conf *request.InitDB) (context.Context, error) // 建库，失败属于 fatal error，因此让它 panic

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo">
         <el-form-item label="请求方法">

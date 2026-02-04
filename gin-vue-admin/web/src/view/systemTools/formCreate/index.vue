@@ -1,5 +1,5 @@
 <template>
-  <fc-designer ref="designer" :config="config" height="calc(100vh - 160px)" />
+  <fc-designer ref="designer" :config="config"/>
 </template>
 
 <script setup>

@@ -20,11 +20,11 @@
                 <el-scrollbar height="calc(100vh - 240px)">
                     <div class="px-2 pt-1 pb-1">
                         <div v-for="product in filteredProducts"
-                            :key="product.id"
+                            :key="product.ID"
                             class="product-item flex items-center justify-between p-3 mb-2 bg-gray-50 rounded-md cursor-pointer transition-all hover:bg-gray-100 hover:shadow-md hover:-translate-y-0.5"
                             :class="{
-                'border-2 border-blue-500 shadow-lg bg-blue-50 -translate-y-0.5': selectedProduct?.id === product.id,
-                'border-2 border-transparent': selectedProduct?.id !== product.id
+                'border-2 border-blue-500 shadow-lg bg-blue-50 -translate-y-0.5': selectedProduct?.ID === product.ID,
+                'border-2 border-transparent': selectedProduct?.ID !== product.ID
               }"
                             @click="selectProduct(product)">
                             <div class="flex-1 min-w-0">
@@ -34,14 +34,11 @@
                                 <div class="text-xs text-gray-500 mb-1.5">款号: {{ product.productCode }}</div>
                                 <div class="flex gap-1">
                                     <el-tag size="small">{{ product.productColor }}</el-tag>
-                                    <el-tag :type="getProductFlagType(product.productFlag)"
-                                        size="small">
-                                        {{ product.productFlag }}
-                                    </el-tag>
+                                    <FfDicTag dicType="productFlag" :dicValue="product.productFlag" />
                                 </div>
                             </div>
                             <el-icon class="text-base text-gray-400 transition-all"
-                                :class="{ 'text-blue-500': selectedProduct?.id === product.id }">
+                                :class="{ 'text-blue-500': selectedProduct?.ID === product.ID }">
                                 <ArrowRight />
                             </el-icon>
                         </div>
@@ -82,11 +79,11 @@
                 <div class="flex-1 overflow-hidden">
                     <el-table v-loading="operationLoading"
                         :data="operationData"
-                        row-key="id"
+                        row-key="ID"
                         border
                         stripe
                         height="calc(100vh - 240px)">
-                        <el-table-column prop="id"
+                        <el-table-column prop="ID"
                             label="序号"
                             width="80"
                             align="center" />
@@ -152,104 +149,15 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowRight } from '@element-plus/icons-vue'
 import { useAppStore } from '@/pinia'
 import OperationDrawer from './components/OperationDrawer.vue'
+import FfDicTag from '@/components/ffDicTag/index.vue'
+import { getProductList } from '@/api/ffProduct'
+import { getOperationList, createOperation, updateOperation, deleteOperation } from '@/api/ffOperation'
 
 defineOptions({
   name: 'FfOperation'
 })
 
 const appStore = useAppStore()
-
-// ==================== 模拟数据 ====================
-// 模拟产品数据
-const mockProducts = [
-  {
-    id: 1,
-    productCode: 'P001',
-    productName: '春季新款连衣裙',
-    productColor: '蓝色',
-    productImg:
-      'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-    accountId: 1001,
-    productOrderNum: 100,
-    productFlag: '生产中'
-  },
-  {
-    id: 2,
-    productCode: 'P002',
-    productName: '夏季短袖T恤',
-    productColor: '白色',
-    productImg:
-      'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
-    accountId: 1002,
-    productOrderNum: 200,
-    productFlag: '未生产'
-  },
-  {
-    id: 3,
-    productCode: 'P003',
-    productName: '秋季卫衣',
-    productColor: '灰色',
-    productImg: '',
-    accountId: 1001,
-    productOrderNum: 150,
-    productFlag: '已完成'
-  },
-  {
-    id: 4,
-    productCode: 'P004',
-    productName: '冬季羽绒服',
-    productColor: '黑色',
-    productImg:
-      'https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg',
-    accountId: 1003,
-    productOrderNum: 80,
-    productFlag: '生产中'
-  },
-  {
-    id: 5,
-    productCode: 'P005',
-    productName: '牛仔裤',
-    productColor: '深蓝',
-    productImg: '',
-    accountId: 1002,
-    productOrderNum: 120,
-    productFlag: '未生产'
-  }
-]
-
-// 模拟工序数据（按产品ID存储）
-const mockOperations = {
-  1: [
-    // 产品ID为1的工序
-    { id: 1, productId: 1, operationName: '裁剪', referencePrice: 5.5 },
-    { id: 2, productId: 1, operationName: '缝纫', referencePrice: 8.0 },
-    { id: 3, productId: 1, operationName: '熨烫', referencePrice: 3.0 },
-    { id: 4, productId: 1, operationName: '质检', referencePrice: 2.5 }
-  ],
-  2: [
-    { id: 5, productId: 2, operationName: '印花', referencePrice: 6.0 },
-    { id: 6, productId: 2, operationName: '缝纫', referencePrice: 5.0 },
-    { id: 7, productId: 2, operationName: '包装', referencePrice: 1.5 }
-  ],
-  3: [
-    { id: 8, productId: 3, operationName: '裁剪', referencePrice: 7.0 },
-    { id: 9, productId: 3, operationName: '缝纫', referencePrice: 10.0 },
-    { id: 10, productId: 3, operationName: '绣花', referencePrice: 12.0 }
-  ],
-  4: [
-    { id: 11, productId: 4, operationName: '充绒', referencePrice: 15.0 },
-    { id: 12, productId: 4, operationName: '缝纫', referencePrice: 12.0 },
-    { id: 13, productId: 4, operationName: '质检', referencePrice: 5.0 },
-    { id: 14, productId: 4, operationName: '包装', referencePrice: 2.0 }
-  ],
-  5: [
-    { id: 15, productId: 5, operationName: '裁剪', referencePrice: 4.0 },
-    { id: 16, productId: 5, operationName: '缝纫', referencePrice: 6.0 }
-  ]
-}
-
-// 用于生成新工序ID
-let nextOperationId = 17
 
 // ==================== 产品相关 ====================
 const productLoading = ref(false)
@@ -270,16 +178,6 @@ const filteredProducts = computed(() => {
   )
 })
 
-// 获取生产标志标签类型
-const getProductFlagType = (flag) => {
-  const typeMap = {
-    未生产: 'info',
-    生产中: 'warning',
-    已完成: 'success'
-  }
-  return typeMap[flag] || 'info'
-}
-
 // 产品搜索
 const handleProductSearch = () => {
   // 搜索是通过计算属性实现的，这里可以添加额外逻辑
@@ -291,13 +189,16 @@ const selectProduct = (product) => {
   getOperationData()
 }
 
-// 获取产品列表（使用模拟数据）
+// 获取产品列表（使用真实API）
 const getProductData = async () => {
   productLoading.value = true
   try {
-    // 模拟API延迟
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    productData.value = [...mockProducts]
+    const res = await getProductList({ productFlag: '1' ,page: 1, pageSize: 100 })
+    if (res.code === 0) {
+      productData.value = res.data.list
+    } else {
+      ElMessage.error('获取产品列表失败')
+    }
   } catch (error) {
     ElMessage.error('获取产品列表失败')
   } finally {
@@ -313,7 +214,7 @@ const operationData = ref([])
 const drawerVisible = ref(false)
 const drawerData = ref(null)
 
-// 获取工序数据（使用模拟数据）
+// 获取工序数据（使用真实API）
 const getOperationData = async () => {
   if (!selectedProduct.value) {
     operationData.value = []
@@ -322,12 +223,17 @@ const getOperationData = async () => {
 
   operationLoading.value = true
   try {
-    // 模拟API延迟
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    const productId = selectedProduct.value.id
-    operationData.value = mockOperations[productId]
-      ? [...mockOperations[productId]]
-      : []
+    const res = await getOperationList({
+      productId: selectedProduct.value.ID,
+      page: 1,
+      pageSize: 100
+    })
+    if (res.code === 0) {
+      operationData.value = res.data.list || []
+    } else {
+      ElMessage.error('获取工序列表失败')
+      operationData.value = []
+    }
   } catch (error) {
     ElMessage.error('获取工序列表失败')
     operationData.value = []
@@ -350,45 +256,29 @@ const openDrawer = (row = null) => {
 const handleDrawerSuccess = async (formData, isEdit) => {
   try {
     operationLoading.value = true
-    // 模拟API延迟
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    const productId = selectedProduct.value.id
-
-    if (!isEdit) {
-      // 新增工序
-      const newOperation = {
-        id: nextOperationId++,
-        productId: productId,
-        operationName: formData.operationName,
-        referencePrice: formData.referencePrice
-      }
-
-      if (!mockOperations[productId]) {
-        mockOperations[productId] = []
-      }
-      mockOperations[productId].push(newOperation)
-
-      ElMessage.success('新增成功')
-    } else {
-      // 编辑工序
-      const operationList = mockOperations[productId]
-      if (operationList) {
-        const index = operationList.findIndex((op) => op.id === formData.id)
-        if (index !== -1) {
-          operationList[index] = {
-            ...operationList[index],
-            operationName: formData.operationName,
-            referencePrice: formData.referencePrice
-          }
-        }
-      }
-
-      ElMessage.success('更新成功')
+    const data = {
+      ...formData,
+      productId: selectedProduct.value.ID
     }
 
-    drawerVisible.value = false
-    getOperationData()
+    if (!isEdit) {
+      delete data.ID
+    }
+
+    let res
+    if (!isEdit) {
+      res = await createOperation(data)
+    } else {
+      res = await updateOperation(data)
+    }
+
+    if (res.code === 0) {
+      ElMessage.success(res.msg)
+      drawerVisible.value = false
+      getOperationData()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
+    }
   } catch (error) {
     ElMessage.error('操作失败')
   } finally {
@@ -396,7 +286,7 @@ const handleDrawerSuccess = async (formData, isEdit) => {
   }
 }
 
-// 删除工序（使用模拟数据）
+// 删除工序（使用真实API）
 const handleDelete = (row) => {
   ElMessageBox.confirm(
     `确定要删除工序 "${row.operationName}" 吗？`,
@@ -410,21 +300,13 @@ const handleDelete = (row) => {
     .then(async () => {
       try {
         operationLoading.value = true
-        // 模拟API延迟
-        await new Promise((resolve) => setTimeout(resolve, 300))
-
-        const productId = selectedProduct.value.id
-        const operationList = mockOperations[productId]
-
-        if (operationList) {
-          const index = operationList.findIndex((op) => op.id === row.id)
-          if (index !== -1) {
-            operationList.splice(index, 1)
-          }
+        const res = await deleteOperation({ ID: row.ID })
+        if (res.code === 0) {
+          ElMessage.success(res.msg)
+          getOperationData()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
         }
-
-        ElMessage.success('删除成功')
-        getOperationData()
       } catch (error) {
         ElMessage.error('删除失败')
       } finally {

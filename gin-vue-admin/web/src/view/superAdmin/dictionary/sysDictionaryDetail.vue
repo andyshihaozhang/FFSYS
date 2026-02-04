@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <div class="gva-table-box">
       <div class="gva-btn-list justify-between flex items-center">
         <span class="text font-bold">字典详细内容</span>
@@ -187,7 +187,7 @@
   } from '@/api/sysDictionaryDetail' // 此处请自行替换地址
   import { ref, watch } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { formatBoolean, formatDate } from '@/utils/format'
+  import { formatBoolean } from '@/utils/format'
   import { useAppStore } from '@/pinia'
   import { Search } from '@element-plus/icons-vue'
 
@@ -332,9 +332,9 @@
           type: 'success',
           message: '删除成功'
         })
-        if (tableData.value.length === 1 && page.value > 1) {
-          page.value--
-        }
+        // if (tableData.value.length === 1 && page.value > 1) {
+        //   page.value--
+        // }
         await getTreeData() // 重新加载数据
       }
     })

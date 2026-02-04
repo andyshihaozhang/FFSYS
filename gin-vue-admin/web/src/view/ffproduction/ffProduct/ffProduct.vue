@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="ff-custom-panel">
         <!-- 搜索区域 -->
         <div class="gva-search-box">
             <el-form ref="searchFormRef"
@@ -21,15 +21,19 @@
                         clearable />
                 </el-form-item>
                 <el-form-item label="生产标志">
-                    <el-select v-model="searchInfo.productFlag"
+                    <FfDicSelect v-model="searchInfo.productFlag"
+                        dicType="productFlag"
                         placeholder="请选择生产标志"
+                        clearable />
+                </el-form-item>
+                <el-form-item label="客户">
+                    <el-select v-model="searchInfo.accountId"
+                        placeholder="请选择客户"
                         clearable>
-                        <el-option label="未生产"
-                            value="未生产" />
-                        <el-option label="生产中"
-                            value="生产中" />
-                        <el-option label="已完成"
-                            value="已完成" />
+                        <el-option v-for="item in accountOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value" />
                     </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -52,10 +56,10 @@
 
             <el-table v-loading="loading"
                 :data="tableData"
-                row-key="id"
+                row-key="ID"
                 border
                 stripe>
-                <el-table-column prop="id"
+                <el-table-column prop="ID"
                     label="序号"
                     width="80"
                     align="center" />
@@ -69,7 +73,7 @@
                     align="center" />
                 <el-table-column prop="productColor"
                     label="产品颜色"
-                    width="80"
+                    width="100"
                     align="center">
                     <template #default="{ row }">
                         <el-tag size="small">{{ row.productColor }}</el-tag>
@@ -80,19 +84,14 @@
                     min-width="100"
                     align="center">
                     <template #default="{ row }">
-                        <el-image v-if="row.productImg"
-                            :src="row.productImg"
-                            :preview-src-list="[row.productImg]"
-                            fit="cover"
-                            style="width: 50px; height: 50px; cursor: pointer"
-                            preview-teleported />
+                        <CustomPic v-if="row.productImg" pic-type="file" :pic-src="row.productImg" preview />
                         <span v-else
                             class="text-gray-400">暂无图片</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="accountId"
-                    label="客户ID"
-                    min-width="100"
+                <el-table-column prop="accountName"
+                    label="客户名称"
+                    min-width="120"
                     align="center" />
                 <el-table-column prop="productOrderNum"
                     label="下单数量"
@@ -103,10 +102,7 @@
                     width="100"
                     align="center">
                     <template #default="{ row }">
-                        <el-tag :type="getProductFlagType(row.productFlag)"
-                            size="small">
-                            {{ row.productFlag }}
-                        </el-tag>
+                        <FfDicTag dicType="productFlag" :dicValue="row.productFlag" />
                     </template>
                 </el-table-column>
                 <el-table-column label="操作"
@@ -132,8 +128,8 @@
 
             <!-- 分页 -->
             <div class="gva-pagination">
-                <el-pagination v-model:current-page="page"
-                    v-model:page-size="pageSize"
+                <el-pagination :current-page="page"
+                    :page-size="pageSize"
                     :page-sizes="[10, 20, 50, 100]"
                     :total="total"
                     layout="total, sizes, prev, pager, next, jumper"
@@ -145,6 +141,7 @@
         <!-- 新增/编辑抽屉 -->
         <ProductDrawer v-model="drawerVisible"
             :data="drawerData"
+            :accountOptions="accountOptions"
             @success="handleDrawerSuccess" />
     </div>
 </template>
@@ -154,6 +151,10 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAppStore } from '@/pinia'
 import ProductDrawer from './components/ProductDrawer.vue'
+import FfDicTag from '@/components/ffDicTag/index.vue'
+import FfDicSelect from '@/components/ffDicSelect/index.vue'
+import { getProductList, createProduct, updateProduct, deleteProduct } from '@/api/ffProduct'
+import { getAccountOptions } from '@/api/ffAccount'
 
 defineOptions({
   name: 'FfProduct'
@@ -174,124 +175,16 @@ const searchInfo = ref({
   productCode: '',
   productName: '',
   productColor: '',
-  productFlag: ''
+  productFlag: null,
+  accountId: null
 })
 
 // 抽屉相关
 const drawerVisible = ref(false)
 const drawerData = ref(null)
 
-// ==================== 工具函数 ====================
-const getProductFlagType = (flag) => {
-  const typeMap = {
-    未生产: 'info',
-    生产中: 'warning',
-    已完成: 'success'
-  }
-  return typeMap[flag] || 'info'
-}
-
-// ==================== API 调用 (模拟数据) ====================
-const getProductList = async (params) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  const mockData = [
-    {
-      id: 1,
-      productCode: 'P001',
-      productName: '春季新款连衣裙',
-      productColor: '蓝色',
-      productImg:
-        'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-      accountId: 1001,
-      productOrderNum: 100,
-      productFlag: '生产中'
-    },
-    {
-      id: 2,
-      productCode: 'P002',
-      productName: '夏季短袖T恤',
-      productColor: '白色',
-      productImg:
-        'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg',
-      accountId: 1002,
-      productOrderNum: 200,
-      productFlag: '未生产'
-    },
-    {
-      id: 3,
-      productCode: 'P003',
-      productName: '秋季卫衣',
-      productColor: '灰色',
-      productImg: '',
-      accountId: 1001,
-      productOrderNum: 150,
-      productFlag: '已完成'
-    },
-    {
-      id: 4,
-      productCode: 'P004',
-      productName: '冬季羽绒服',
-      productColor: '黑色',
-      productImg:
-        'https://fuss10.elemecdn.com/1/34/19aa98b1fcb2781c4fba33d850549jpeg.jpeg',
-      accountId: 1003,
-      productOrderNum: 80,
-      productFlag: '生产中'
-    },
-    {
-      id: 5,
-      productCode: 'P005',
-      productName: '牛仔裤',
-      productColor: '深蓝',
-      productImg: '',
-      accountId: 1002,
-      productOrderNum: 120,
-      productFlag: '未生产'
-    }
-  ]
-
-  let filteredData = mockData.filter((item) => {
-    if (params.productCode && !item.productCode.includes(params.productCode))
-      return false
-    if (params.productName && !item.productName.includes(params.productName))
-      return false
-    if (params.productColor && !item.productColor.includes(params.productColor))
-      return false
-    if (params.productFlag && item.productFlag !== params.productFlag)
-      return false
-    return true
-  })
-
-  const start = (params.page - 1) * params.pageSize
-  const end = start + params.pageSize
-
-  return {
-    code: 0,
-    data: {
-      list: filteredData.slice(start, end),
-      total: filteredData.length,
-      page: params.page,
-      pageSize: params.pageSize
-    },
-    msg: '查询成功'
-  }
-}
-
-const createProduct = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '创建成功' }
-}
-
-const updateProduct = async (_data) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '更新成功' }
-}
-
-const deleteProduct = async (_id) => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  return { code: 0, msg: '删除成功' }
-}
+// 客户选项
+const accountOptions = ref([])
 
 // ==================== 业务逻辑 ====================
 const getTableData = async () => {
@@ -308,6 +201,8 @@ const getTableData = async () => {
       total.value = res.data.total
       page.value = res.data.page
       pageSize.value = res.data.pageSize
+    } else {
+      ElMessage.error(res.msg || '获取数据失败')
     }
   } catch (error) {
     ElMessage.error('获取数据失败')
@@ -327,7 +222,8 @@ const onReset = () => {
     productCode: '',
     productName: '',
     productColor: '',
-    productFlag: ''
+    productFlag: null,
+    accountId: null
   }
   page.value = 1
   getTableData()
@@ -364,6 +260,8 @@ const handleDrawerSuccess = async (formData, isEdit) => {
       ElMessage.success(res.msg)
       drawerVisible.value = false
       getTableData()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
     }
   } catch (error) {
     ElMessage.error('操作失败')
@@ -382,10 +280,12 @@ const handleDelete = (row) => {
     .then(async () => {
       try {
         loading.value = true
-        const res = await deleteProduct(row.id)
+        const res = await deleteProduct({ ID: row.ID })
         if (res.code === 0) {
           ElMessage.success(res.msg)
           getTableData()
+        } else {
+          ElMessage.error(res.msg || '删除失败')
         }
       } catch (error) {
         ElMessage.error('删除失败')
@@ -401,7 +301,19 @@ const handleDelete = (row) => {
 // ==================== 生命周期 ====================
 onMounted(() => {
   getTableData()
+  loadAccountOptions()
 })
+
+const loadAccountOptions = async () => {
+  try {
+    const res = await getAccountOptions()
+    if (res.code === 0) {
+      accountOptions.value = res.data
+    }
+  } catch (error) {
+    console.error('获取客户选项失败', error)
+  }
+}
 </script>
 
 <style lang="scss" scoped>

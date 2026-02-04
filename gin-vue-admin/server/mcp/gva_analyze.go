@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	model "github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	model "gin-vue-admin/server/model/system"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"gin-vue-admin/server/global"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 

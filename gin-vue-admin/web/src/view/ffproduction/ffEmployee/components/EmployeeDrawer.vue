@@ -33,36 +33,26 @@
 
             <el-form-item label="性别"
                 prop="sex">
-                <el-radio-group v-model="formData.sex">
-                    <el-radio label="男">男</el-radio>
-                    <el-radio label="女">女</el-radio>
-                </el-radio-group>
+                <FfDicSelect v-model="formData.sex"
+                    dicType="gender"
+                    placeholder="请选择性别"
+                    style="width: 100%" />
             </el-form-item>
 
             <el-form-item label="角色"
                 prop="authorityIds">
-                <el-select v-model="formData.authorityIds"
+                <FfDicSelect v-model="formData.authorityIds"
+                    dicType="employeeAuthority"
                     placeholder="请选择角色"
-                    style="width: 100%">
-                    <el-option label="组长"
-                        value="组长" />
-                    <el-option label="员工"
-                        value="员工" />
-                </el-select>
+                    style="width: 100%" />
             </el-form-item>
 
             <el-form-item label="状态"
                 prop="employeeStatus">
-                <el-select v-model="formData.employeeStatus"
+                <FfDicSelect v-model="formData.employeeStatus"
+                    dicType="employeeStatus"
                     placeholder="请选择状态"
-                    style="width: 100%">
-                    <el-option label="在职"
-                        value="在职" />
-                    <el-option label="离职"
-                        value="离职" />
-                    <el-option label="休假"
-                        value="休假" />
-                </el-select>
+                    style="width: 100%" />
             </el-form-item>
         </el-form>
     </FfDrawer>
@@ -71,6 +61,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import FfDrawer from '@/components/ffDrawer/index.vue'
+import FfDicSelect from '@/components/ffDicSelect/index.vue'
 
 defineOptions({
   name: 'EmployeeDrawer'
@@ -91,20 +82,20 @@ const emit = defineEmits(['update:modelValue', 'success'])
 
 // 默认表单数据
 const getDefaultFormData = () => ({
-  id: null,
+  ID: null,
   employeeName: '',
   phone: '',
   age: null,
-  sex: '男',
-  authorityIds: '员工',
-  employeeStatus: '在职'
+  sex: 1,
+  authorityIds: 2,
+  employeeStatus: 1
 })
 
 const formRef = ref(null)
 const formData = ref(getDefaultFormData())
 
 // 是否为编辑模式
-const isEdit = computed(() => !!props.data?.id)
+const isEdit = computed(() => !!props.data?.ID)
 
 // 双向绑定 visible
 const visible = computed({

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="ff-custom-panel">
     <WarningBar
       title="本功能提供同步的表格导出功能，大数据量的异步表格导出功能，可以选择点我定制"
       href="https://flipped-aurora.feishu.cn/docx/KwjxdnvatozgwIxGV0rcpkZSn4d"

@@ -2,9 +2,9 @@ package initialize
 
 import (
 	oracle "github.com/dzwvip/gorm-oracle"
-	"github.com/flipped-aurora/gin-vue-admin/server/config"
-	"github.com/flipped-aurora/gin-vue-admin/server/global"
-	"github.com/flipped-aurora/gin-vue-admin/server/initialize/internal"
+	"gin-vue-admin/server/config"
+	"gin-vue-admin/server/global"
+	"gin-vue-admin/server/initialize/internal"
 	"gorm.io/gorm"
 )
 
